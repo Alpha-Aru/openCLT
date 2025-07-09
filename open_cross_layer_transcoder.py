@@ -238,8 +238,8 @@ class OpenCrossLayerTranscoder(nn.Module):
                 mlp_input = self.mlp_inputs_captured[layer_idx] # this is what gets read
                 mlp_output = self.mlp_activations[layer_idx] # this is what gets written
 
-                mlp_input_normalized = F.layer_norm(mlp_input, mlp_input.shape[-1]) # Normalize input to MLP
-                mlp_output_normalized = F.layer_norm(mlp_output, mlp_output.shape[-1]) # Normalize output of MLP
+                mlp_input_normalized = F.layer_norm(mlp_input, (mlp_input.shape[-1],)) # Normalize input to MLP
+                mlp_output_normalized = F.layer_norm(mlp_output, (mlp_output.shape[-1],)) # Normalize output of MLP
                 # Encode to features
                 features = self.encoders[layer_idx](mlp_input_normalized) # linear encoder
                 features_activated = self.activation_functions[layer_idx](features) # non-linear activation
@@ -408,7 +408,7 @@ class OpenCrossLayerTranscoder(nn.Module):
                             decoder_norms = []
                             for decoder_layer in range(layer_idx, self.num_layers):
                                 key = f"{layer_idx}_{decoder_layer}"
-                                decoder_norm = torch.norm(self.decoders[key].weight, dim=1)
+                                decoder_norm = torch.norm(self.decoders[key].weight, dim=0)
                                 decoder_norms.append(decoder_norm)
                             
                             total_decoder_norm = torch.stack(decoder_norms, dim=0).sum(dim=0)
